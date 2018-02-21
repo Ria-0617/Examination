@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# ’Ç‰Á
+.vs/
+vs2015/
+Debug/
+ipch/
