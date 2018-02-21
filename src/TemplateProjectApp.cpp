@@ -8,10 +8,10 @@ void TemplateProjectApp::prepareSettings(Settings* settings) {
 void TemplateProjectApp::setup()
 {
 	camera = CameraPersp(getWindowWidth(), getWindowHeight(), fov, 0.1f, 100.f);
-	camera.setEyePoint(Vec3f(0.f, 0.f, -5.f));
+	camera.setEyePoint(Vec3f(0.f, 5.f, -10.f));
 	camera.setCenterOfInterestPoint(Vec3f(0.f, 0.f, 0.f));
 
-	ui_camera = CameraOrtho(0.f,(float)getWindowWidth(), (float)getWindowHeight(), 0.f, -1.f, 1.f);
+	ui_camera = CameraOrtho(0.f, (float)getWindowWidth(), (float)getWindowHeight(), 0.f, -1.f, 1.f);
 	ui_camera.setEyePoint(Vec3f(0.f, 0.f, 0.f));
 	ui_camera.setCenterOfInterestPoint(Vec3f(0.f, 0.f, -1.f));
 
@@ -47,14 +47,12 @@ void TemplateProjectApp::update()
 {
 	if (pressing_key.count(KeyEvent::KEY_UP))
 		playerPos.z += 0.1f;
-
 	if (pressing_key.count(KeyEvent::KEY_DOWN))
 		playerPos.z -= 0.1f;
-
 	if (pressing_key.count(KeyEvent::KEY_RIGHT))
-		playerPos.x += 0.1f;
+		playerPos.x -= 0.1f;
 	if (pressing_key.count(KeyEvent::KEY_LEFT))
-		playerPos -= 0.1f;
+		playerPos.x += 0.1f;
 }
 
 void TemplateProjectApp::draw()
@@ -67,13 +65,26 @@ void TemplateProjectApp::draw()
 #pragma endregion
 	// clear out the window with black
 	gl::clear(Color(0, 0, 0));
-	
 
 	gl::setMatrices(camera);
 
+	// templateField
+#if 1
+	for (int x = 0; x < 30; ++x) {
+		for (int z = 0; z < 30; ++z) {
+			color = x + z & 0x01 ? Color(0.f, 1.f, 1.f) : Color(0.f, 0.0f, 1.f);
+			gl::color(color);
+			gl::drawCube(Vec3f(0.f + x, -5.0f, 0.f + z), Vec3f(1.f, 0.1f, 1.f));
+		}
+	}
+#endif
+
+	gl::pushModelView();
 	gl::translate(playerPos);
 	gl::rotate(playerRot);
+	gl::color(Color(1.f, 1.f, 1.f));
 	gl::drawCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
+	gl::popModelView();
 
 #pragma region disable
 	gl::disableDepthRead();
@@ -82,8 +93,10 @@ void TemplateProjectApp::draw()
 	//gl::disable(GL_LIGHTING);
 #pragma endregion
 
+	gl::color(Color(1.f, 1.f, 1.f));
 	gl::setMatrices(ui_camera);
-	
+
+
 }
 
 CINDER_APP_NATIVE(TemplateProjectApp, RendererGl)

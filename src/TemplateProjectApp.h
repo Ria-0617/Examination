@@ -26,15 +26,18 @@ class TemplateProjectApp : public AppNative {
 
 	// ÉLÅ[ì¸óÕ
 	std::set<int> pressing_key;
+
+	// template
+	Color color = Color(0.f, 0.f, 0.f);
 public:
 	void prepareSettings(Settings* settings);
 	void setup();
 	void shutdown();
-	void mouseDown(ci::app::MouseEvent event);
-	void mouseDrag(ci::app::MouseEvent event);
-	void mouseUp(ci::app::MouseEvent event);
-	void keyDown(ci::app::KeyEvent event);
-	void keyUp(ci::app::KeyEvent event);
+	void mouseDown(MouseEvent event);
+	void mouseDrag(MouseEvent event);
+	void mouseUp(MouseEvent event);
+	void keyDown(KeyEvent event);
+	void keyUp(KeyEvent event);
 	void update();
 	void draw();
 };
