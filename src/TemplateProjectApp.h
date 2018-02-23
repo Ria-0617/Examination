@@ -17,6 +17,10 @@ class TemplateProjectApp : public AppNative {
 	// ÉJÉÅÉâ
 	CameraPersp camera;
 	float fov = 35.f;
+	Vec3f cameraCurrentPosition = Vec3f(0.f, 0.f, 0.f);
+	Vec3f cameraPosition = Vec3f(0.f, 0.f, 0.f);
+
+	Vec3f mousePosition = Vec3f(0.f, 0.f, 0.f);
 
 	CameraOrtho ui_camera;
 
@@ -41,3 +45,5 @@ public:
 	void update();
 	void draw();
 };
+
+Vec3f ToRadians(const Vec3f& degrees);

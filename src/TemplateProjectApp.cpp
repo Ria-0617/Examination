@@ -7,15 +7,20 @@ void TemplateProjectApp::prepareSettings(Settings* settings) {
 
 void TemplateProjectApp::setup()
 {
+	cameraPosition = Vec3f(0.f, 3.f, -8.f) + playerPos;
+	cameraCurrentPosition = cameraPosition;
+
 	camera = CameraPersp(getWindowWidth(), getWindowHeight(), fov, 0.1f, 100.f);
-	camera.setEyePoint(Vec3f(0.f, 5.f, -10.f));
-	camera.setCenterOfInterestPoint(Vec3f(0.f, 0.f, 0.f));
+	camera.setEyePoint(cameraPosition);
+	camera.setCenterOfInterestPoint(playerPos);
 
 	ui_camera = CameraOrtho(0.f, (float)getWindowWidth(), (float)getWindowHeight(), 0.f, -1.f, 1.f);
 	ui_camera.setEyePoint(Vec3f(0.f, 0.f, 0.f));
 	ui_camera.setCenterOfInterestPoint(Vec3f(0.f, 0.f, -1.f));
 
 	gl::enableAlphaBlending();
+
+	gl::enable(GL_COLOR_MATERIAL);
 }
 
 void TemplateProjectApp::shutdown() {
@@ -45,14 +50,32 @@ void TemplateProjectApp::keyUp(KeyEvent event) {
 
 void TemplateProjectApp::update()
 {
-	if (pressing_key.count(KeyEvent::KEY_UP))
-		playerPos.z += 0.1f;
-	if (pressing_key.count(KeyEvent::KEY_DOWN))
-		playerPos.z -= 0.1f;
-	if (pressing_key.count(KeyEvent::KEY_RIGHT))
-		playerPos.x -= 0.1f;
-	if (pressing_key.count(KeyEvent::KEY_LEFT))
-		playerPos.x += 0.1f;
+	
+	//mousePosition += Vec3f(getMousePos().y, getMousePos().x, 0.f);
+
+	if (pressing_key.count(KeyEvent::KEY_w))
+		playerPos +=Vec3f(0.f, 0.f, 0.1f);
+	if (pressing_key.count(KeyEvent::KEY_s))
+		playerPos -= Vec3f(0.f, 0.f, 0.1f);
+	if (pressing_key.count(KeyEvent::KEY_d))
+		playerPos -= Vec3f(0.1f, 0.f, 0.f);
+	if (pressing_key.count(KeyEvent::KEY_a))
+		playerPos += Vec3f(0.1f, 0.f, 0.f);
+
+
+	float dist = cameraPosition.distance(playerPos);
+	if (dist > 10.f) {
+		Vec3f d = (cameraPosition - playerPos).normalized();
+		cameraCurrentPosition = playerPos + d * 10.f;
+	}
+
+	//cameraPosition = Vec3f(0.f, 5.f, -8.f) + playerPos;
+
+	Vec3f target = playerPos + Vec3f(0.f, 0.f, 2.f);
+
+	camera.setEyePoint(cameraCurrentPosition);
+	camera.setCenterOfInterestPoint(target + Vec3f(0.f, 1.f, 0.f));
+
 }
 
 void TemplateProjectApp::draw()
@@ -77,11 +100,10 @@ void TemplateProjectApp::draw()
 			gl::drawCube(Vec3f(0.f + x, -5.0f, 0.f + z), Vec3f(1.f, 0.1f, 1.f));
 		}
 	}
-#endif
+#endif	
 
 	gl::pushModelView();
 	gl::translate(playerPos);
-	gl::rotate(playerRot);
 	gl::color(Color(1.f, 1.f, 1.f));
 	gl::drawCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
 	gl::popModelView();
@@ -97,6 +119,10 @@ void TemplateProjectApp::draw()
 	gl::setMatrices(ui_camera);
 
 
+}
+
+Vec3f ToRadians(const Vec3f& degrees) {
+	return degrees * M_PI / 180.f;
 }
 
 CINDER_APP_NATIVE(TemplateProjectApp, RendererGl)
