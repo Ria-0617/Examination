@@ -107,11 +107,12 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\PreProcessing.cpp" />
+    <ClCompile Include="..\src\JoyController.cpp" />
     <ClCompile Include="..\src\TemplateProjectApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />
+    <ClInclude Include="..\src\JoyController.h" />
     <ClInclude Include="..\src\TemplateProjectApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

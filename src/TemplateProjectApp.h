@@ -9,18 +9,18 @@
 #include "cinder\gl\Texture.h"
 #include "cinder\ObjLoader.h"
 #include <set>
+#include "JoyController.h"
 
 using namespace ci;
 using namespace ci::app;
 
 class TemplateProjectApp : public AppNative {
+	JoyController joy1;
 	// ÉJÉÅÉâ
 	CameraPersp camera;
 	float fov = 35.f;
 	Vec3f cameraCurrentPosition = Vec3f(0.f, 0.f, 0.f);
 	Vec3f cameraPosition = Vec3f(0.f, 0.f, 0.f);
-
-	Vec3f mousePosition = Vec3f(0.f, 0.f, 0.f);
 
 	CameraOrtho ui_camera;
 
@@ -33,6 +33,9 @@ class TemplateProjectApp : public AppNative {
 
 	// template
 	Color color = Color(0.f, 0.f, 0.f);
+
+	float notMoveValue = 0.01f;
+
 public:
 	void prepareSettings(Settings* settings);
 	void setup();

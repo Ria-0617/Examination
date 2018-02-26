@@ -7,7 +7,7 @@ void TemplateProjectApp::prepareSettings(Settings* settings) {
 
 void TemplateProjectApp::setup()
 {
-	cameraPosition = Vec3f(0.f, 3.f, -8.f) + playerPos;
+	cameraPosition = Vec3f(0.f, 0.f, -8.f) + playerPos;
 	cameraCurrentPosition = cameraPosition;
 
 	camera = CameraPersp(getWindowWidth(), getWindowHeight(), fov, 0.1f, 100.f);
@@ -19,8 +19,9 @@ void TemplateProjectApp::setup()
 	ui_camera.setCenterOfInterestPoint(Vec3f(0.f, 0.f, -1.f));
 
 	gl::enableAlphaBlending();
-
 	gl::enable(GL_COLOR_MATERIAL);
+
+	joy1.SetUp();
 }
 
 void TemplateProjectApp::shutdown() {
@@ -50,30 +51,39 @@ void TemplateProjectApp::keyUp(KeyEvent event) {
 
 void TemplateProjectApp::update()
 {
-	
-	//mousePosition += Vec3f(getMousePos().y, getMousePos().x, 0.f);
+	//joy1.Debug();
+	joy1.Update();
 
-	if (pressing_key.count(KeyEvent::KEY_w))
-		playerPos +=Vec3f(0.f, 0.f, 0.1f);
-	if (pressing_key.count(KeyEvent::KEY_s))
-		playerPos -= Vec3f(0.f, 0.f, 0.1f);
-	if (pressing_key.count(KeyEvent::KEY_d))
-		playerPos -= Vec3f(0.1f, 0.f, 0.f);
-	if (pressing_key.count(KeyEvent::KEY_a))
-		playerPos += Vec3f(0.1f, 0.f, 0.f);
+	if (JOYERR_NOERROR == joyGetPosEx(JOYSTICKID1, &joy1.joy)) { //0番のジョイスティックの情報を見る
+		// スティックを傾けていないときに動かないように
+		if (joy1.LeftStickValue().x > notMoveValue || joy1.LeftStickValue().x < -notMoveValue)
+			playerPos.x += joy1.LeftStickValue().x;
 
+		if (joy1.LeftStickValue().z > notMoveValue || joy1.LeftStickValue().z < -notMoveValue)
+			playerPos.z += joy1.LeftStickValue().z;
 
+		if (joy1.RightStickValue().x > notMoveValue || joy1.RightStickValue().x < -notMoveValue)
+			playerRot.x += joy1.RightStickValue().x;
+
+		if (joy1.RightStickValue().y > notMoveValue || joy1.RightStickValue().y < -notMoveValue)
+			playerRot.y += joy1.RightStickValue().y;
+	}
+
+	// 離れようとするとついてくるカメラ
 	float dist = cameraPosition.distance(playerPos);
 	if (dist > 10.f) {
 		Vec3f d = (cameraPosition - playerPos).normalized();
-		cameraCurrentPosition = playerPos + d * 10.f;
+		cameraPosition = playerPos + d * 10.f;
 	}
 
-	//cameraPosition = Vec3f(0.f, 5.f, -8.f) + playerPos;
+	// 余韻
+	Vec3f d = cameraPosition - cameraCurrentPosition;
+	cameraCurrentPosition += d * 0.01f;
+
 
 	Vec3f target = playerPos + Vec3f(0.f, 0.f, 2.f);
 
-	camera.setEyePoint(cameraCurrentPosition);
+	camera.setEyePoint(cameraCurrentPosition + Vec3f(0.f,5.f,0.f));
 	camera.setCenterOfInterestPoint(target + Vec3f(0.f, 1.f, 0.f));
 
 }
@@ -104,6 +114,7 @@ void TemplateProjectApp::draw()
 
 	gl::pushModelView();
 	gl::translate(playerPos);
+	gl::rotate(playerRot);
 	gl::color(Color(1.f, 1.f, 1.f));
 	gl::drawCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
 	gl::popModelView();
