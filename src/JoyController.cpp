@@ -31,10 +31,7 @@ void JoyController::Debug() {
 	}
 }
 
-void JoyController::Update() {
-	leftStickValue = Vec3f((maxSlopNum / 2.f - joy.dwXpos) / (maxSlopNum * 3.f),
-		0.f, (maxSlopNum / 2.f - joy.dwYpos) / (maxSlopNum*3.f));
-
-	rightStickValue = Vec3f((maxSlopNum / 2.f - joy.dwRpos) / maxSlopNum,
-		(maxSlopNum / 2.f - joy.dwZpos) / maxSlopNum, 0.f);
+// ê≥ãKâª
+float JoyController::StickValue(unsigned long value) {
+	return 1 - 2.f*value / maxSlopNum;
 }

@@ -7,7 +7,7 @@ void TemplateProjectApp::prepareSettings(Settings* settings) {
 
 void TemplateProjectApp::setup()
 {
-	cameraPosition = Vec3f(0.f, 0.f, -8.f) + playerPos;
+	cameraPosition = playerPos + Vec3f(0.f, 0.f, -8.f);
 	cameraCurrentPosition = cameraPosition;
 
 	camera = CameraPersp(getWindowWidth(), getWindowHeight(), fov, 0.1f, 100.f);
@@ -17,6 +17,8 @@ void TemplateProjectApp::setup()
 	ui_camera = CameraOrtho(0.f, (float)getWindowWidth(), (float)getWindowHeight(), 0.f, -1.f, 1.f);
 	ui_camera.setEyePoint(Vec3f(0.f, 0.f, 0.f));
 	ui_camera.setCenterOfInterestPoint(Vec3f(0.f, 0.f, -1.f));
+
+	playerPrevPos = playerPos;
 
 	gl::enableAlphaBlending();
 	gl::enable(GL_COLOR_MATERIAL);
@@ -28,64 +30,49 @@ void TemplateProjectApp::shutdown() {
 
 }
 
-void TemplateProjectApp::mouseDown(MouseEvent event)
-{
-
-}
-
-void TemplateProjectApp::mouseDrag(MouseEvent event) {
-
-}
-
-void TemplateProjectApp::mouseUp(MouseEvent event) {
-
-}
-
-void TemplateProjectApp::keyDown(KeyEvent event) {
-	pressing_key.insert(event.getCode());
-}
-
-void TemplateProjectApp::keyUp(KeyEvent event) {
-	pressing_key.erase(event.getCode());
-}
-
 void TemplateProjectApp::update()
 {
 	//joy1.Debug();
-	joy1.Update();
+
+	Matrix44f m;
+
+	// 移動に合わせて自機回転
+	auto diff = playerPos - playerPrevPos;
+	if (diff != Vec3f(0.f, 0.f, 0.f)) {
+		playerRot.y = atan2f(diff.x, diff.z) * 180.f / (float)M_PI;
+		playerPrevPos = playerPos;
+	}
 
 	if (JOYERR_NOERROR == joyGetPosEx(JOYSTICKID1, &joy1.joy)) { //0番のジョイスティックの情報を見る
 		// スティックを傾けていないときに動かないように
-		if (joy1.LeftStickValue().x > notMoveValue || joy1.LeftStickValue().x < -notMoveValue)
-			playerPos.x += joy1.LeftStickValue().x;
+		if (joy1.StickValue(joy1.joy.dwRpos) > notMoveValue || joy1.StickValue(joy1.joy.dwRpos) < -notMoveValue ||
+			joy1.StickValue(joy1.joy.dwZpos) > notMoveValue || joy1.StickValue(joy1.joy.dwZpos) < -notMoveValue)
+			rotation += Vec3f(0.f, joy1.StickValue(joy1.joy.dwZpos), 0.f)*rotationSpeed;
 
-		if (joy1.LeftStickValue().z > notMoveValue || joy1.LeftStickValue().z < -notMoveValue)
-			playerPos.z += joy1.LeftStickValue().z;
+		m = Matrix44f::createRotation(ToRadians(rotation));
 
-		if (joy1.RightStickValue().x > notMoveValue || joy1.RightStickValue().x < -notMoveValue)
-			playerRot.x += joy1.RightStickValue().x;
+		// 移動
+		if (joy1.StickValue(joy1.joy.dwXpos) > notMoveValue || joy1.StickValue(joy1.joy.dwXpos) < -notMoveValue ||
+			joy1.StickValue(joy1.joy.dwYpos) > notMoveValue || joy1.StickValue(joy1.joy.dwYpos) < -notMoveValue)
+			playerPos += m * Vec3f(joy1.StickValue(joy1.joy.dwXpos), 0.f, joy1.StickValue(joy1.joy.dwYpos))  * speed;
 
-		if (joy1.RightStickValue().y > notMoveValue || joy1.RightStickValue().y < -notMoveValue)
-			playerRot.y += joy1.RightStickValue().y;
+		if (joy1.joy.dwButtons == 0x0020) {    // 32
+			ball.position = playerPos;
+			ball.v = m.transformVec(Vec3f(0.f, 0.f, 0.5f));
+			ball.time = 10;
+			balls.push_back(ball);
+		}
 	}
 
-	// 離れようとするとついてくるカメラ
-	float dist = cameraPosition.distance(playerPos);
-	if (dist > 10.f) {
-		Vec3f d = (cameraPosition - playerPos).normalized();
-		cameraPosition = playerPos + d * 10.f;
-	}
+	/*for (int i = 0; i < balls.size(); ++i) {
+		balls[i].position += m*diff.normalized()*balls[i].speed;
+	}*/
 
-	// 余韻
-	Vec3f d = cameraPosition - cameraCurrentPosition;
-	cameraCurrentPosition += d * 0.01f;
+	cameraPosition = playerPos + m * Vec3f(0.f, 0.f, -8.f);
+	Vec3f target = playerPos + m * Vec3f(0.f, 0.f, 2.f);
 
-
-	Vec3f target = playerPos + Vec3f(0.f, 0.f, 2.f);
-
-	camera.setEyePoint(cameraCurrentPosition + Vec3f(0.f,5.f,0.f));
+	camera.setEyePoint(cameraPosition + Vec3f(0.f, 5.f, 0.f));
 	camera.setCenterOfInterestPoint(target + Vec3f(0.f, 1.f, 0.f));
-
 }
 
 void TemplateProjectApp::draw()
@@ -116,7 +103,21 @@ void TemplateProjectApp::draw()
 	gl::translate(playerPos);
 	gl::rotate(playerRot);
 	gl::color(Color(1.f, 1.f, 1.f));
-	gl::drawCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
+	gl::drawColorCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
+	gl::popModelView();
+
+	gl::pushModelView();
+
+	for (int i = 0; i < balls.size(); ++i) {
+		balls[i].position += balls[i].v;
+		balls[i].time -= 1;
+
+		gl::drawSphere(balls[i].position, 0.1f);
+
+		/*if (balls[i].time < 0) {
+			balls.erase(balls.begin() + i-1);
+		}*/
+	}
 	gl::popModelView();
 
 #pragma region disable

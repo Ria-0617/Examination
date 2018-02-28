@@ -20,18 +20,6 @@ public:
 
 	void SetUp();
 	void Debug();
-	void Update();
 
-	ci::Vec3f LeftStickValue() {
-		return leftStickValue;
-	}
-
-	ci::Vec3f RightStickValue() {
-		return rightStickValue;
-	}
-
-	float MaxSlopNum() {
-		return maxSlopNum;
-	}
-
+	float StickValue(unsigned long value);
 };

@@ -8,43 +8,52 @@
 #include "cinder\ImageIo.h"
 #include "cinder\gl\Texture.h"
 #include "cinder\ObjLoader.h"
-#include <set>
 #include "JoyController.h"
+
+#include <iostream>
+#include <vector>
 
 using namespace ci;
 using namespace ci::app;
 
+struct ballStatus {
+	Vec3f position;
+	Vec3f v;
+	int time;
+};
+
 class TemplateProjectApp : public AppNative {
-	JoyController joy1;
 	// カメラ
 	CameraPersp camera;
 	float fov = 35.f;
 	Vec3f cameraCurrentPosition = Vec3f(0.f, 0.f, 0.f);
 	Vec3f cameraPosition = Vec3f(0.f, 0.f, 0.f);
 
+	Vec3f rotation = Vec3f(0.f, 0.f, 0.f);
+	float rotationSpeed = 3.f;
+
 	CameraOrtho ui_camera;
 
 	// プレイヤー
 	Vec3f playerPos = Vec3f(0.f, 0.f, 0.f);
+	Vec3f playerPrevPos;
 	Vec3f playerRot = Vec3f(0.f, 0.f, 0.f);
+	float speed = 0.3f;
 
-	// キー入力
-	std::set<int> pressing_key;
+	ballStatus ball;
+	std::vector<ballStatus> balls;
 
+	// ゲームパッド
+	JoyController joy1;
+	float notMoveValue = 0.05f;
+	
 	// template
 	Color color = Color(0.f, 0.f, 0.f);
-
-	float notMoveValue = 0.01f;
 
 public:
 	void prepareSettings(Settings* settings);
 	void setup();
 	void shutdown();
-	void mouseDown(MouseEvent event);
-	void mouseDrag(MouseEvent event);
-	void mouseUp(MouseEvent event);
-	void keyDown(KeyEvent event);
-	void keyUp(KeyEvent event);
 	void update();
 	void draw();
 };
