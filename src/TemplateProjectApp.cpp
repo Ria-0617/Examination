@@ -56,17 +56,16 @@ void TemplateProjectApp::update()
 			joy1.StickValue(joy1.joy.dwYpos) > notMoveValue || joy1.StickValue(joy1.joy.dwYpos) < -notMoveValue)
 			playerPos += m * Vec3f(joy1.StickValue(joy1.joy.dwXpos), 0.f, joy1.StickValue(joy1.joy.dwYpos))  * speed;
 
+		// ‹Ê”­ŽË
 		if (joy1.joy.dwButtons == 0x0020) {    // 32
+			Matrix44f m = Matrix44f::createRotation(ToRadians(playerRot));
+
 			ball.position = playerPos;
 			ball.v = m.transformVec(Vec3f(0.f, 0.f, 0.5f));
 			ball.time = 10;
 			balls.push_back(ball);
 		}
 	}
-
-	/*for (int i = 0; i < balls.size(); ++i) {
-		balls[i].position += m*diff.normalized()*balls[i].speed;
-	}*/
 
 	cameraPosition = playerPos + m * Vec3f(0.f, 0.f, -8.f);
 	Vec3f target = playerPos + m * Vec3f(0.f, 0.f, 2.f);
@@ -99,20 +98,24 @@ void TemplateProjectApp::draw()
 	}
 #endif	
 
+#pragma region Player
+	// ƒvƒŒƒCƒ„[
 	gl::pushModelView();
 	gl::translate(playerPos);
 	gl::rotate(playerRot);
 	gl::color(Color(1.f, 1.f, 1.f));
 	gl::drawColorCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
 	gl::popModelView();
+#pragma endregion
 
+	// ‹Ê
 	gl::pushModelView();
 
 	for (int i = 0; i < balls.size(); ++i) {
 		balls[i].position += balls[i].v;
 		balls[i].time -= 1;
 
-		gl::drawSphere(balls[i].position, 0.1f);
+		gl::drawSphere(balls[i].position, 0.5f);
 
 		/*if (balls[i].time < 0) {
 			balls.erase(balls.begin() + i-1);
@@ -129,8 +132,6 @@ void TemplateProjectApp::draw()
 
 	gl::color(Color(1.f, 1.f, 1.f));
 	gl::setMatrices(ui_camera);
-
-
 }
 
 Vec3f ToRadians(const Vec3f& degrees) {
