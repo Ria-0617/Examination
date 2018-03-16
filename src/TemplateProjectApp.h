@@ -10,7 +10,6 @@
 #include "cinder\ObjLoader.h"
 #include "JoyController.h"
 
-#include <iostream>
 #include <vector>
 
 using namespace ci;
