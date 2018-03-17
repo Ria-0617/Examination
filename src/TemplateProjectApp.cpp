@@ -71,6 +71,19 @@ void TemplateProjectApp::update()
 		}
 	}
 
+	Ray ray(playerPos, Vec3f(0.f, -1.f, 0.f));
+
+	float z;
+	if (ray.calcPlaneIntersection(Vec3f(0.f, -5.f, 0.f), Vec3f(0.f, 1.f, 0.f), &z)) {
+		Vec3f p = ray.calcPosition(z);
+		playerPos.y = p.y + 0.5f;
+	}
+	else {
+		playerPos -= m * Vec3f(0.f, 0.01f, 0.f);
+	}
+
+
+
 	cameraPosition = playerPos + m * Vec3f(0.f, 0.f, -8.f);
 	Vec3f target = playerPos + m * Vec3f(0.f, 0.f, 2.f);
 
@@ -97,7 +110,7 @@ void TemplateProjectApp::draw()
 		for (int z = 0; z < 30; ++z) {
 			color = x + z & 0x01 ? Color(0.f, 1.f, 1.f) : Color(0.f, 0.0f, 1.f);
 			gl::color(color);
-			gl::drawCube(Vec3f(0.f + x, -5.0f, 0.f + z), Vec3f(1.f, 0.1f, 1.f));
+			gl::drawCube(Vec3f(0.f + x, -5.f, 0.f + z), Vec3f(1.f, 0.1f, 1.f));
 		}
 	}
 #endif	
@@ -111,6 +124,7 @@ void TemplateProjectApp::draw()
 	gl::drawColorCube(Vec3f(0.f, 0.f, 0.f), Vec3f(1.f, 1.f, 1.f));
 	gl::popModelView();
 #pragma endregion
+
 
 	// ‹Ê
 	gl::pushModelView();
