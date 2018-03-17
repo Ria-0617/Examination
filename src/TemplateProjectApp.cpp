@@ -45,25 +45,29 @@ void TemplateProjectApp::update()
 
 	if (JOYERR_NOERROR == joyGetPosEx(JOYSTICKID1, &joy1.joy)) { //0番のジョイスティックの情報を見る
 		// スティックを傾けていないときに動かないように
-		if (joy1.StickValue(joy1.joy.dwRpos) > notMoveValue || joy1.StickValue(joy1.joy.dwRpos) < -notMoveValue ||
-			joy1.StickValue(joy1.joy.dwZpos) > notMoveValue || joy1.StickValue(joy1.joy.dwZpos) < -notMoveValue)
-			rotation += Vec3f(0.f, joy1.StickValue(joy1.joy.dwZpos), 0.f)*rotationSpeed;
+		/*if (joy1.StickValueNomalize(joy1.joy.dwRpos) > notMoveValue || joy1.StickValueNomalize(joy1.joy.dwRpos) < -notMoveValue ||
+			joy1.StickValueNomalize(joy1.joy.dwZpos) > notMoveValue || joy1.StickValueNomalize(joy1.joy.dwZpos) < -notMoveValue)
+			rotation += Vec3f(0.f, joy1.StickValueNomalize(joy1.joy.dwZpos), 0.f)*rotationSpeed;
+*/
+		if(joy1.MoveDecision(joy1.joy.dwRpos, notMoveValue)|| joy1.MoveDecision(joy1.joy.dwZpos, notMoveValue))
+			rotation += Vec3f(0.f, joy1.StickValueNomalize(joy1.joy.dwZpos), 0.f)*rotationSpeed;
+
 
 		m = Matrix44f::createRotation(ToRadians(rotation));
 
 		// 移動
-		if (joy1.StickValue(joy1.joy.dwXpos) > notMoveValue || joy1.StickValue(joy1.joy.dwXpos) < -notMoveValue ||
-			joy1.StickValue(joy1.joy.dwYpos) > notMoveValue || joy1.StickValue(joy1.joy.dwYpos) < -notMoveValue)
-			playerPos += m * Vec3f(joy1.StickValue(joy1.joy.dwXpos), 0.f, joy1.StickValue(joy1.joy.dwYpos))  * speed;
+		if (joy1.StickValueNomalize(joy1.joy.dwXpos) > notMoveValue || joy1.StickValueNomalize(joy1.joy.dwXpos) < -notMoveValue ||
+			joy1.StickValueNomalize(joy1.joy.dwYpos) > notMoveValue || joy1.StickValueNomalize(joy1.joy.dwYpos) < -notMoveValue)
+			playerPos += m * Vec3f(joy1.StickValueNomalize(joy1.joy.dwXpos), 0.f, joy1.StickValueNomalize(joy1.joy.dwYpos))  * speed;
 
 		// 玉発射
 		if (joy1.joy.dwButtons == 0x0020) {    // 32
 			Matrix44f m = Matrix44f::createRotation(ToRadians(playerRot));
 
-			ball.position = playerPos;
+			/*ball.position = playerPos;
 			ball.v = m.transformVec(Vec3f(0.f, 0.f, 0.5f));
 			ball.time = 10;
-			balls.push_back(ball);
+			balls.push_back(ball);*/
 		}
 	}
 
@@ -111,16 +115,8 @@ void TemplateProjectApp::draw()
 	// 玉
 	gl::pushModelView();
 
-	for (int i = 0; i < balls.size(); ++i) {
-		balls[i].position += balls[i].v;
-		balls[i].time -= 1;
+	
 
-		gl::drawSphere(balls[i].position, 0.5f);
-
-		/*if (balls[i].time < 0) {
-			balls.erase(balls.begin() + i-1);
-		}*/
-	}
 	gl::popModelView();
 
 #pragma region disable

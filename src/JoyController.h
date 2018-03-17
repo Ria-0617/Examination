@@ -21,5 +21,7 @@ public:
 	void SetUp();
 	void Debug();
 
-	float StickValue(unsigned long value);
+	float StickValueNomalize(unsigned long value);
+
+	bool MoveDecision(float stickValue, float limitValue);
 };

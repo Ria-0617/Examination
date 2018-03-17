@@ -11,12 +11,19 @@
 #include "JoyController.h"
 
 #include <iostream>
-#include <vector>
+#include <list>
 
 using namespace ci;
 using namespace ci::app;
 
-struct ballStatus {
+class BallStatus {
+public:
+	/*BallStatus(ci::Vec3f position);
+	void update();
+	void draw();
+	bool isDead();
+*/
+private:
 	Vec3f position;
 	Vec3f v;
 	int time;
@@ -40,12 +47,12 @@ class TemplateProjectApp : public AppNative {
 	Vec3f playerRot = Vec3f(0.f, 0.f, 0.f);
 	float speed = 0.3f;
 
-	ballStatus ball;
-	std::vector<ballStatus> balls;
+	BallStatus ball;
+	std::list<BallStatus> balls;
 
 	// ゲームパッド
 	JoyController joy1;
-	float notMoveValue = 0.05f;
+	float notMoveValue = 0.9f;
 	
 	// template
 	Color color = Color(0.f, 0.f, 0.f);

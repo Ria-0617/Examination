@@ -31,7 +31,11 @@ void JoyController::Debug() {
 	}
 }
 
+bool JoyController::MoveDecision(float stickValue, float limitValue) {
+	return stickValue > limitValue || stickValue < -limitValue ? true : false;
+}
+
 // ³‹K‰»
-float JoyController::StickValue(unsigned long value) {
+float JoyController::StickValueNomalize(unsigned long value) {
 	return 1 - 2.f*value / maxSlopNum;
 }
